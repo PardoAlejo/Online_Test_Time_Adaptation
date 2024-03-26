@@ -92,6 +92,8 @@ def get_args():
     parser.add_argument('--initial_data_size', default=500, type=int, help='initial data size to compute delay (default: 500)')
     parser.add_argument('--spatial_dim_size', default=224, type=int, help='image spatial dimension (default: 224)')
     parser.add_argument('--initial_batch_size', default=1, type=int, help='batch size for delay computation (default: 1)')
+    
+    parser.add_argument('--episodic', default=False, action='store_true', help='reset model and optimizer after each forward pass')
     args = parser.parse_args()
 
     if args.method == 'memo':

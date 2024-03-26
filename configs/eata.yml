@@ -1,0 +1,17 @@
+output_dir: ./output/eata
+optimization:
+  eta: 1
+  steps: 1
+  optimizer: sgd
+  lr: 0.00025
+  momentum: 0.9
+  
+
+model:
+  method: eata #eta without fishers
+  arch: resnet50
+  update_bn_only: true
+  fisher_alpha: 0.05
+  margin_e_constant: 0.4
+  d_margin: 0.05
+  fisher_size: 2000

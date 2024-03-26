@@ -1,0 +1,47 @@
+output_dir: ./output/
+exp_type: each_shift_reset
+
+dataset:
+  name: imagenetc
+  paths:
+    imagenet: '/ibex/ai/reference/CV/ILSVR/classification-localization/data/jpeg/'
+    imagenetc: '/ibex/ai/reference/CV/ImageNet-C'
+    imagenetr: '/ibex/ai/reference/CV/imagenet-r'
+    imagenet3dcc: '/ibex/ai/reference/CV/ImageNet-3DCC'
+  initial_data_size: 500
+  spatial_dim_size: 224
+  transforms: true
+  r_dataset: false
+  shuffle: true
+  batch_size: 64
+  num_classes: 1000
+
+evaluation:
+  test_val: false # add imagenet validation set at the end of test set
+  level: 5
+  corruption: defocus_blur
+  eta: 1 # 0-1
+
+optimization:
+  steps: 1
+  optimizer: sgd
+  lr: 0.00025
+  momentum: 0.9
+
+model:
+  method: basic
+  arch: resnet50
+  update_bn_only: false
+
+run:
+  gpu: 0
+  device: cuda
+  seed: 42
+  num_workers: 4
+  episodic: false
+  runs: 10
+  initial_batch_size: 1
+  single_model: false
+  use_wandb: false
+
+

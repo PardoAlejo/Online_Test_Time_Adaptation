@@ -4,17 +4,29 @@ import torch
 from torchvision import datasets, transforms
 from torch.utils.data import TensorDataset, DataLoader
 
-def initial_data(args):
-    if args.method not in ['eta','eata', 'memo']:
-        data = torch.randn((args.initial_data_size, 3, args.spatial_dim_size, args.spatial_dim_size))
-        labs = torch.randint(0, 10, size=(args.initial_data_size,))
+def initial_data(config):
+    if config.model.method not in ['eta','eata', 'memo']:
+        data = torch.randn((config.data.initial_data_size, 3, config.data.spatial_dim_size, config.data.spatial_dim_size))
+        labs = torch.randint(0, 10, size=(config.data.initial_data_size,))
         dataset = TensorDataset(data, labs)
-        data_loader = DataLoader(dataset, batch_size=args.initial_batch_size, shuffle=False)
+        data_loader = DataLoader(dataset, batch_size=config.run.initial_batch_size, shuffle=False)
         return data_loader
     else:
-        return ImageNet_val_subset_data(args.imagenet_path, batch_size=args.initial_batch_size, shuffle=False, subset_size=args.initial_data_size, with_transforms=args.transforms, return_dataset =args.r_dataset)
+        return ImageNet_val_subset_data(data_dir=config.dataset.paths.imagenet, 
+                                        batch_size=config.dataset.batch_size, 
+                                        shuffle=config.dataset.shuffle, 
+                                        subset_size=-1, 
+                                        with_transforms=config.dataset.transforms, 
+                                        return_dataset=config.dataset.transforms)
 
-def ImageNet_C_data(corruption: str, level: int, data_dir: str, batch_size: int, shuffle: bool, with_transforms: bool = True, return_dataset: bool = False):
+def ImageNet_C_data(corruption: str, 
+                    level: int, 
+                    data_dir: str, 
+                    batch_size: int, 
+                    shuffle: bool, 
+                    with_transforms: bool = True, 
+                    return_dataset: bool = False,
+                    num_workers: int = 4):
         
     # define the data transform
     transform = transforms.Compose([
@@ -25,11 +37,17 @@ def ImageNet_C_data(corruption: str, level: int, data_dir: str, batch_size: int,
 
     # Load ImageNet-C dataset
     dataset = datasets.ImageFolder(os.path.join(data_dir, corruption, str(level)), transform=transform if with_transforms else None)
-    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
     return dataset if return_dataset else data_loader
 
 
-def ImageNet_val_subset_data(data_dir: str, batch_size: int, shuffle: bool, subset_size: int, with_transforms: bool = True, return_dataset:bool = False):
+def ImageNet_val_subset_data(data_dir: str, 
+                             batch_size: int, 
+                             shuffle: bool, 
+                             subset_size: int, 
+                             with_transforms: bool = True, 
+                             return_dataset:bool = False,
+                             num_workers: int = 4):
 
     transform = transforms.Compose([transforms.Resize(256),
             transforms.CenterCrop(224),
@@ -44,13 +62,19 @@ def ImageNet_val_subset_data(data_dir: str, batch_size: int, shuffle: bool, subs
         random.shuffle(indices)
         dataset.samples = [dataset.samples[i] for i in indices[:subset_size]]
         dataset.targets = [dataset.targets[i] for i in indices[:subset_size]]
-    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
     if return_dataset: 
         return dataset
     return data_loader
 
 class ImageNetCorruption_pth(datasets.ImageFolder):
-    def __init__(self, imagenet_path, imagenetc_dataroot, corruption_name, level=5, transform=None, is_carry_index=False):
+    def __init__(self, imagenet_path, 
+                 imagenetc_dataroot, 
+                 corruption_name, 
+                 level=5, 
+                 transform=None, 
+                 is_carry_index=False):
+        
         super().__init__(os.path.join(imagenet_path, 'val'), transform=transform)
         self.imagenetc_dataroot = imagenetc_dataroot
         self.corruption_name = corruption_name
@@ -75,7 +99,12 @@ class ImageNetCorruption_pth(datasets.ImageFolder):
     def __len__(self):
         return self.data.shape[0]
 
-def ImageNet_R_data( data_dir: str, batch_size: int, shuffle: bool, with_transforms: bool = True, return_dataset: bool = False):
+def ImageNet_R_data( data_dir: str, 
+                    batch_size: int, 
+                    shuffle: bool, 
+                    with_transforms: bool = True, 
+                    return_dataset: bool = False,
+                    num_workers: int = 4):
         
     # define the data transform
     transform = transforms.Compose([
@@ -87,40 +116,62 @@ def ImageNet_R_data( data_dir: str, batch_size: int, shuffle: bool, with_transfo
 
     # Load ImageNet-C dataset
     dataset = datasets.ImageFolder(os.path.join(data_dir), transform=transform if with_transforms else None)
-    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
     return dataset if return_dataset else data_loader
 
-def get_dataloader(args):
-    if args.corruption == 'val':
-        return ImageNet_val_subset_data(data_dir=args.imagenet_path, batch_size=args.batch_size, 
-                                        shuffle=args.shuffle, subset_size=-1, with_transforms=args.transforms, 
-                                        return_dataset=args.r_dataset)
-    if args.dataset == 'imagenetc':
-        corrupted_dataloader  = ImageNet_C_data(corruption=args.corruption, level=args.level, 
-                                                data_dir=args.imagenetc_path, batch_size=args.batch_size, 
-                                                shuffle=args.shuffle, with_transforms=args.transforms, return_dataset=args.r_dataset)
+def get_dataloader(config):
+    if config.evaluation.corruption == 'val':
+        return ImageNet_val_subset_data(data_dir=config.dataset.paths.imagenet, 
+                                        batch_size=config.dataset.batch_size, 
+                                        shuffle=config.dataset.shuffle, 
+                                        subset_size=-1, 
+                                        with_transforms=config.dataset.transforms, 
+                                        return_dataset=config.dataset.r_dataset,
+                                        num_workers=config.run.num_workers
+                                        )
+    if config.dataset.name == 'imagenetc':
+        corrupted_dataloader  = ImageNet_C_data(data_dir=config.dataset.paths.imagenetc,  
+                                                batch_size=config.dataset.batch_size, 
+                                                shuffle=config.dataset.shuffle, 
+                                                with_transforms=config.dataset.transforms, 
+                                                return_dataset=config.dataset.r_dataset,
+                                                corruption=config.evaluation.corruption, 
+                                                level=config.evaluation.level,
+                                                num_workers=config.run.num_workers
+                                                )
 
-    elif args.dataset == 'imagenet3dcc': 
+    elif config.dataset.name == 'imagenet3dcc': 
         # The same procedure as for ImageNetC should work. The only difference is using `args.imagenet3dcc_path` instead of `args.imagenetc_path`
-        corrupted_dataloader = ImageNet_C_data(corruption=args.corruption, level=args.level, 
-                                                data_dir=args.imagenet3dcc_path, batch_size=args.batch_size, 
-                                                shuffle=args.shuffle, with_transforms=args.transforms, return_dataset=args.r_dataset)
-    elif args.dataset == 'imagenetr':
-        corrupted_dataloader = ImageNet_R_data(data_dir=args.imagenetr_path, batch_size=args.batch_size, 
-                                                shuffle=args.shuffle, with_transforms=args.transforms, return_dataset=args.r_dataset)
+        corrupted_dataloader = ImageNet_C_data(cdata_dir=config.dataset.paths.imagenetc,  
+                                                batch_size=config.dataset.batch_size, 
+                                                shuffle=config.dataset.shuffle, 
+                                                with_transforms=config.dataset.transforms, 
+                                                return_dataset=config.dataset.r_dataset,
+                                                corruption=config.evaluation.corruption, 
+                                                level=config.evaluation.level,
+                                                num_workers=config.run.num_workers
+                                                )
+    elif config.dataset.name == 'imagenetr':
+        corrupted_dataloader = ImageNet_R_data(data_dir=config.dataset.paths.imagenetc,  
+                                                batch_size=config.dataset.batch_size, 
+                                                shuffle=config.dataset.shuffle, 
+                                                with_transforms=config.dataset.transforms, 
+                                                return_dataset=config.dataset.r_dataset,
+                                                num_workers=config.run.num_workers
+                                                )
 
     return corrupted_dataloader
     
-def get_cp(args):
+def get_cp(config):
     # Episodic Experiments
-    if args.dataset == 'imagenetr':
+    if config.dataset.name == 'imagenetr':
         return ['imagenetr']
     
-    if args.corruption not in ['all', 'all_ordered']:
-        return [args.corruption]
+    if config.evaluation.corruption not in ['all', 'all_ordered']:
+        return [config.evaluation.corruption]
     
     # Continual Experiments
-    if args.dataset == 'imagenetc':
+    if config.dataset.name == 'imagenetc':
         corrupts = ['gaussian_noise', 'shot_noise', 'impulse_noise', 'defocus_blur', 'glass_blur', \
                         'motion_blur', 'zoom_blur', 'snow', 'frost', 'fog', 'brightness', 'contrast', \
                         'elastic_transform', 'pixelate', 'jpeg_compression']
@@ -128,11 +179,11 @@ def get_cp(args):
         corrupts = ['bit_error', 'color_quant', 'far_focus', 'flash', 'fog_3d', 'h265_abr', 'h265_crf', \
                         'iso_noise', 'low_light', 'near_focus', 'xy_motion_blur', 'z_motion_blur']
         
-    if args.corruption == 'all': #random order of all corruptions (experiment in Appendix)
+    if config.evaluation.corruption == 'all': #random order of all corruptions (experiment in Appendix)
         random.shuffle(corrupts)
     
     # Add clean validation set.
-    if args.test_val:
+    if config.evaluation.test_val:
         corrupts = [*corrupts,'val']
         
     return corrupts 

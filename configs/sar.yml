@@ -1,0 +1,10 @@
+output_dir: ./output/sar
+optimization:
+  momentum: 0.9
+
+model:
+  method: sar
+  arch: resnet50
+  update_bn_only: true
+  reset_constant_em: 0.2
+  margin_e_constant: 0.4

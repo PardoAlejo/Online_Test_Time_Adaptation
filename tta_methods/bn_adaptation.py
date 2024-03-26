@@ -1,19 +1,23 @@
 import torch.nn as nn
 from torch.nn import functional as F
-from copy import deepcopy
+from tta_methods import Basic_Wrapper
+
 # This code is adapted from the paper:
 # https://proceedings.neurips.cc/paper/2020/file/85690f81aadc1749175c187784afc9ee-Paper.pdf
 "Batch Size and prior strength N are set to 256 -> prior = 0.5"
-class BN_Adaptation(nn.Module):
+class BN_Adaptation(Basic_Wrapper):
     """BN Adapts the model by updating the statistics of the BatchNorm Layers.
     """
-    def __init__(self, model, args):
-        super().__init__()
+    def __init__(self, model, config):
+        super().__init__(model, config)
         self.model = model
         prior = 0.5
         self.model = BayesianBatchNorm.adapt_model(self.model, prior)
-        self.model.to(args.device)
-    def forward(self, x):
+        self.model.to(config.run.device)
+        if config.run.episodic:
+            self.copy_model_and_optimizer()
+            
+    def forward_and_adapt(self, x):
         return self.model(x)
 
 class BayesianBatchNorm(nn.Module):
@@ -56,6 +60,7 @@ class BayesianBatchNorm(nn.Module):
         self.prior = prior
 
     def forward(self, input):
+        import pdb; pdb.set_trace()
         self.norm(input)
 
         running_mean = (

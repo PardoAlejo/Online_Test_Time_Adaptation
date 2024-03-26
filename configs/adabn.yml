@@ -1,0 +1,5 @@
+output_dir: ./output/adabn
+model:
+  method: adabn
+  arch: resnet50
+  update_bn_only: true

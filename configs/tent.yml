@@ -1,0 +1,13 @@
+output_dir: ./output/tent
+optimization:
+  eta: 1
+  steps: 1
+  optimizer: sgd
+  lr: 0.00025
+  momentum: 0.9
+  
+
+model:
+  method: tent
+  arch: resnet50
+  update_bn_only: true

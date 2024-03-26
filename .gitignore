@@ -4,3 +4,4 @@ wandb/
 *.sh
 slurm
 .DS_Store
+*pycache*
