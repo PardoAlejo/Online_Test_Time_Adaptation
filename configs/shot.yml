@@ -1,4 +1,4 @@
-output_dir: ./output/shotim
+output_dir: ./output/shot
 optimization:
   eta: 1
   steps: 1
@@ -8,6 +8,7 @@ optimization:
   
 
 model:
-  method: shotim
+  method: shot
   arch: resnet50
   update_bn_only: true
+  beta_clusteting_loss: 0.1
