@@ -4,10 +4,10 @@ exp_type: each_shift_reset
 dataset:
   name: imagenetc
   paths:
-    imagenet: '/ibex/ai/reference/CV/ILSVR/classification-localization/data/jpeg/'
-    imagenetc: '/ibex/ai/reference/CV/ImageNet-C'
-    imagenetr: '/ibex/ai/reference/CV/imagenet-r'
-    imagenet3dcc: '/ibex/ai/reference/CV/ImageNet-3DCC'
+    imagenet: '<path to imagenet>'
+    imagenetc: '<path to imagenet-c>'
+    imagenetr: '<path to imagenet-r>'
+    imagenet3dcc: '<path to imagenet-3d>'
   initial_data_size: 500
   spatial_dim_size: 224
   transforms: true
