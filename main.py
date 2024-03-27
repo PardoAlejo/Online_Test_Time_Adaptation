@@ -1,8 +1,7 @@
 import os
 import torch
-from utils.argparse import get_args
 from models.resnets import _all_models 
-from utils.online_eval import delayed_eval_online, delayed_eval_online_memo
+from utils.online_eval import delayed_eval_online
 from utils.dataloader import get_dataloader, get_cp
 from tta_methods import _all_methods
 from utils.config import parse_option
@@ -35,11 +34,8 @@ def main(config):
             print('Performing single model evaluation')
         corrupted_dataloader = get_dataloader(config)
 
-        # MEMO has a different evaluation function due to their implementation
-        delayed_func = delayed_eval_online_memo if config.model.method == 'memo' else delayed_eval_online
-
         # Evaluating the model
-        adjusted_acc, tta_method = delayed_func(tta_method, 
+        adjusted_acc, tta_method = delayed_eval_online(tta_method, 
                                                 corrupted_dataloader, 
                                                 eta=config.evaluation.eta, 
                                                 device=config.run.device, 
