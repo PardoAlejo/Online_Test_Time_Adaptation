@@ -1,13 +1,7 @@
-<!-- # Online_Test_Time_Adaptation -->
-# Revisiting Test Time Adaptation Under Online Evaluation
-
-![plot](./pipeline.png)
-
-Paper: [Link_To_Paper](https://arxiv.org/pdf/2304.04795.pdf)
 
 This benchmark is a step towards standardizing the evaluation of Test Time Adaptation (TTA) methods. We have implementations of 14 different TTA methods from the literature. The following table reports the average episodic error rate (%) of the implemented methods under the offline and online evaluation schemes on ImageNet-C.
 
-|Method | Venue |Paper| Code| Offline Eval. (%)| Online Eval. (%)|
+|Method | Venue |Paper| Code| Current Eval. (%)| Realistic Eval. (%)|
 |------| ------|-------|------|:-----------:|:-----------:|
 |ETA / EATA| ICML'22|[(paper)](https://arxiv.org/abs/2204.02610)|[(code)](https://github.com/mr-eggplant/EATA)| 52.0 | 55.6|
 |SHOT / SHOT-IM| ICML'20|[(paper)](https://arxiv.org/abs/2002.08546)|[(code)](https://github.com/fiveai/LAME/blob/master/src/adaptation/shot.py)| 59.9 | 59.1 | 
@@ -55,7 +49,7 @@ At last, we also considered single model evaluation. In this setup, a random pre
 ### Episodic Evaluation
 To evaluate a TTA method under different stream speeds, run:
 ```
-python main.py --cfg [configs/<METHOD>] optimization.eta [ETA] dataset.name [DATASET] evaluation.corruption [CORRUPTION] evaluation.level [LEVEL] dataset.paths.imagenetc [PATH] run.batch_size [BATCH_SIZE] output_dir [OUTPUT_PATH]
+python main.py --cfg [configs/<METHOD>.yml] optimization.eta [ETA] dataset.name [DATASET] evaluation.corruption [CORRUPTION] evaluation.level [LEVEL] dataset.paths.imagenetc [PATH] run.batch_size [BATCH_SIZE] output_dir [OUTPUT_PATH]
 ```
 where
 - ETA: is a float between 0 and 1 representing $\eta$ in our paper for varying the stream speed. Default value is $\eta = 1$ which corresponds to online evaluation.
@@ -74,7 +68,7 @@ where
 ### Continual Evaluation
 To test a given TTA method under a continual sequence of domain shifts, run:
 ```
-python main.py --cfg [configs/<METHOD>] exp_type continual evaluation.test_val true evaluation.eta [ETA] dataset.name [DATASET] evaluation.corruption [CORRUPTION] evaluation.level [LEVEL] dataset.paths.imagenetc [PATH] dataset.batch_size [BATCH_SIZE] output_dir [OUTPUT_PATH]
+python main.py --cfg [configs/<METHOD>.yml] exp_type continual evaluation.test_val true evaluation.eta [ETA] dataset.name [DATASET] evaluation.corruption [CORRUPTION] evaluation.level [LEVEL] dataset.paths.imagenetc [PATH] dataset.batch_size [BATCH_SIZE] output_dir [OUTPUT_PATH]
 ```
 Note that the main difference is passing `--exp_type continual`. 
 - CORRUPTION: should belong to `['all', 'all_ordered']` where `all_ordered` sets the order of the corruptions similar to the one in Section 4.3 (Figure 3), and `all` shuffles all corruptions randomly. 
@@ -85,7 +79,7 @@ All the remaining arguments follow our episodic evaluation.
 ### Single Model Experiments
 To test a given TTA method in a single model evaluation scheme, following Section 4.6, run:
 ```
-python main.py --cfg [configs/<METHOD>]  evaluation.single_model evaluation.eta [ETA]  dataset.name [DATASET] evaluatino.corruption [CORRUPTION] evaluation.level [LEVEL] dataset.paths.imagenetc [PATH] output_dir [OUTPUT_PATH] dataset.batch_size [BATCH_SIZE]
+python main.py --cfg [configs/<METHOD>.yml]  evaluation.single_model evaluation.eta [ETA]  dataset.name [DATASET] evaluatino.corruption [CORRUPTION] evaluation.level [LEVEL] dataset.paths.imagenetc [PATH] output_dir [OUTPUT_PATH] dataset.batch_size [BATCH_SIZE]
 ```
 where all other arguments follow our episodic evaluation.
 
@@ -97,23 +91,10 @@ You will need to add a config file for the new method under the `configs/` folde
 
 To test the efficacy of the new implemented method in the episodic evaluation scheme, run:
 ```
-python main.py --cfg [configs/<METHOD>] optimization.eta [ETA] dataset.name [DATASET] evaluation.corruption [CORRUPTION] evaluation.level [LEVEL] dataset.paths.imagenetc [PATH] run.batch_size [BATCH_SIZE] output_dir [OUTPUT_PATH]
+python main.py --cfg [configs/<METHOD>.yml] optimization.eta [ETA] dataset.name [DATASET] evaluation.corruption [CORRUPTION] evaluation.level [LEVEL] dataset.paths.imagenetc [PATH] run.batch_size [BATCH_SIZE] output_dir [OUTPUT_PATH]
 ```
 where [METHOD] should be the added key in the `_all_methods` dictionary.
 
-## Citation
-If you find our work useful, please consider citing our paper:
-
-```bibtex
-@misc{alfarra2023revisiting,
-      title={Revisiting Test Time Adaptation under Online Evaluation}, 
-      author={Motasem Alfarra and Hani Itani and Alejandro Pardo and Shyma Alhuwaider and Merey Ramazanova and Juan C. Pérez and Zhipeng Cai and Matthias Müller and Bernard Ghanem},
-      year={2023},
-      eprint={2304.04795},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
-}
-```
 
 
 
