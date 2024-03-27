@@ -31,7 +31,7 @@ def main(config):
          
         config.evaluation.corruption = corruption
         print("loading "+ corruption+" corruption ...")
-        if config.run.single_model:
+        if config.evaluation.single_model:
             print('Performing single model evaluation')
         corrupted_dataloader = get_dataloader(config)
 
@@ -44,7 +44,7 @@ def main(config):
                                                 eta=config.evaluation.eta, 
                                                 device=config.run.device, 
                                                 dataset_name=config.dataset.name, 
-                                                single_model=config.run.single_model)
+                                                single_model=config.evaluation.single_model)
 
         # logger.info(args.corruption)
         print(f"Under shift type {config.evaluation.corruption} After {config.model.method} Top-1 Adjusted Accuracy: {adjusted_acc*100:.5f}")

@@ -21,7 +21,8 @@ evaluation:
   level: 5
   corruption: defocus_blur
   eta: 1 # 0-1
-
+  single_model: false
+  
 optimization:
   steps: 1
   optimizer: sgd
@@ -41,7 +42,7 @@ run:
   episodic: false
   runs: 10
   initial_batch_size: 1
-  single_model: false
+  
   use_wandb: false
 
 
